@@ -1,4 +1,4 @@
-""" Elastic Search implementation for courseware search index """
+""" Elatic Search implementation for courseware search index """
 import copy
 import logging
 
@@ -7,7 +7,6 @@ from django.core.cache import cache
 from elasticsearch import Elasticsearch, exceptions
 from elasticsearch.helpers import bulk, BulkIndexError
 
-from search.api import QueryParseError
 from search.search_engine_base import SearchEngine
 from search.utils import ValueRange, _is_iterable
 
@@ -18,7 +17,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # We _may_ want to use these for their special uses for certain queries,
 # but for analysed fields these kinds of characters are removed anyway, so
 # we can safely remove them from analysed matches
-RESERVED_CHARACTERS = "+=><!(){}[]^~*:\\/&|?"
+RESERVED_CHARACTERS = "+-=><!(){}[]^\"~*:\\/&|?"
 
 
 def _translate_hits(es_response):
@@ -130,12 +129,12 @@ def _process_filters(filter_dictionary):
                     }
                 ]
             }
-
-        return {
-            "missing": {
-                "field": field
+        else:
+            return {
+                "missing": {
+                    "field": field
+                }
             }
-        }
 
     return [filter_item(field) for field in filter_dictionary]
 
@@ -434,7 +433,8 @@ class ElasticSearchEngine(SearchEngine):
                facet_terms=None,
                exclude_ids=None,
                use_field_match=False,
-               **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, arguments-differ
+               role=None,
+               **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
         """
         Implements call to search the index for the desired content.
 
@@ -574,6 +574,18 @@ class ElasticSearchEngine(SearchEngine):
             }
 
         query = query_segment
+        if role=="mssaregistered":
+            elastic_filters.append(
+                 {"terms": {
+                    "course_visible_to": ["mssaregistered","Empty"]
+                 }}
+            )
+        if role=="Empty":
+            elastic_filters.append(
+                 {"terms": {
+                    "course_visible_to": ["Empty"]
+                 }}
+            )
         if elastic_filters:
             filter_segment = {
                 "bool": {
@@ -600,13 +612,8 @@ class ElasticSearchEngine(SearchEngine):
                 **kwargs
             )
         except exceptions.ElasticsearchException as ex:
-            message = unicode(ex)
-            if 'QueryParsingException' in message:
-                log.exception("Malformed search query: %s", message)
-                raise QueryParseError('Malformed search query.')
-            else:
-                # log information and re-raise
-                log.exception("error while searching index - %s", ex.message)
-                raise
+            # log information and re-raise
+            log.exception("error while searching index - %s", ex.message)
+            raise
 
         return _translate_hits(es_response)

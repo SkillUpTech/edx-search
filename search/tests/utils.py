@@ -63,18 +63,14 @@ class ForceRefreshElasticSearchEngine(ElasticSearchEngine):
 class ErroringSearchEngine(MockSearchEngine):
     """ Override to generate search engine error to test """
 
-    def search(self,
-               query_string=None,
-               field_dictionary=None,
-               filter_dictionary=None,
-               **kwargs):  # pylint: disable=arguments-differ
+    def search(self, query_string=None, field_dictionary=None, filter_dictionary=None, **kwargs):
         raise StandardError("There is a problem here")
 
 
 class ErroringIndexEngine(MockSearchEngine):
     """ Override to generate search engine error to test """
 
-    def index(self, doc_type, sources, **kwargs):  # pylint: disable=unused-argument, arguments-differ
+    def index(self, doc_type, sources, **kwargs):  # pylint: disable=unused-argument
         raise StandardError("There is a problem here")
 
 
@@ -82,6 +78,6 @@ class ErroringElasticImpl(Elasticsearch):
     """ Elasticsearch implementation that throws exceptions"""
 
     # pylint: disable=unused-argument
-    def search(self, **kwargs):  # pylint: disable=arguments-differ
+    def search(self, **kwargs):
         """ this will definitely fail """
         raise exceptions.ElasticsearchException("This search operation failed")

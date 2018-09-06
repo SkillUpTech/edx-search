@@ -3,7 +3,7 @@
 # pylint: disable=too-few-public-methods
 import logging
 import json
-
+import pprint
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
@@ -11,8 +11,9 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.http import require_POST
 
 from eventtracking import tracker as track
-from .api import QueryParseError, perform_search, course_discovery_search, course_discovery_filter_fields
+from .api import perform_search, course_discovery_search, course_discovery_filter_fields
 from .initializer import SearchInitializer
+from userroles import roles
 
 # log appears to be standard name used for logger
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -124,11 +125,6 @@ def do_search(request, course_id=None):
         }
         log.debug(unicode(invalid_err))
 
-    except QueryParseError:
-        results = {
-            "error": _('Your query seems malformed. Check for unmatched quotes.')
-        }
-
     # Allow for broad exceptions here - this is an entry point from external reference
     except Exception as err:  # pylint: disable=broad-except
         results = {
@@ -193,13 +189,24 @@ def course_discovery(request):
             }
         )
 
+        role = "Empty"
+        if hasattr(request.user, 'role'):
+            if request.user.role.is_mssaregistered:
+                role = "mssaregistered"
+            elif request.user.role.is_mssaenrolled:
+                role = "mssaenrolled"
+        if request.user.is_staff:
+            role = "staff"
+
         results = course_discovery_search(
             search_term=search_term,
             size=size,
             from_=from_,
             field_dictionary=field_dictionary,
+            role=role,
         )
 
+        
         # Analytics - log search results before sending to browser
         track.emit(
             'edx.course_discovery.search.results_displayed',
@@ -218,11 +225,6 @@ def course_discovery(request):
             "error": unicode(invalid_err)
         }
         log.debug(unicode(invalid_err))
-
-    except QueryParseError:
-        results = {
-            "error": _('Your query seems malformed. Check for unmatched quotes.')
-        }
 
     # Allow for broad exceptions here - this is an entry point from external reference
     except Exception as err:  # pylint: disable=broad-except

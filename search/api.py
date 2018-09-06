@@ -27,17 +27,6 @@ class NoSearchEngineError(Exception):
     pass
 
 
-class QueryParseError(Exception):
-    """QueryParseError will be thrown if the query is malformed.
-
-    If a query has mismatched quotes (e.g. '"some phrase', return a
-    more specific exception so the view can provide a more helpful
-    error message to the user.
-
-    """
-    pass
-
-
 def perform_search(
         search_term,
         user=None,
@@ -76,7 +65,7 @@ def perform_search(
     return results
 
 
-def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary=None):
+def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary=None, role=None):
     """
     Course Discovery activities against the search engine index of course details
     """
@@ -106,6 +95,7 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         filter_dictionary={"enrollment_end": DateRange(datetime.utcnow(), None)},
         exclude_dictionary=exclude_dictionary,
         facet_terms=course_discovery_facets(),
+        role=role,
     )
 
     return results
