@@ -14,6 +14,7 @@ from eventtracking import tracker as track
 from .api import perform_search, course_discovery_search, course_discovery_filter_fields
 from .initializer import SearchInitializer
 from userroles import roles
+from student.models import UserInformation
 
 # log appears to be standard name used for logger
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -189,7 +190,7 @@ def course_discovery(request):
             }
         )
 
-        role = "Empty"
+        role = "open"
         if hasattr(request.user, 'role'):
             if request.user.role.is_mssaregistered:
                 role = "mssaregistered"
@@ -198,12 +199,21 @@ def course_discovery(request):
         if request.user.is_staff:
             role = "staff"
 
+        learning_path_short_code="ALL"
+        try:
+            user_info_obj = UserInformation.objects.get(email=user.email)
+            learningpath = user_info_obj.learning_path_short_code
+            learning_path_short_code=learningpath.learning_path_short_code
+        except:
+            learning_path_short_code="ALL"
+
         results = course_discovery_search(
             search_term=search_term,
             size=size,
             from_=from_,
             field_dictionary=field_dictionary,
             role=role,
+            learning_path_short_code=learning_path_short_code,
         )
 
         

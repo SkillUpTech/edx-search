@@ -434,6 +434,7 @@ class ElasticSearchEngine(SearchEngine):
                exclude_ids=None,
                use_field_match=False,
                role=None,
+               learning_path_short_code=None,
                **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
         """
         Implements call to search the index for the desired content.
@@ -574,18 +575,42 @@ class ElasticSearchEngine(SearchEngine):
             }
 
         query = query_segment
+
         if role=="mssaregistered":
             elastic_filters.append(
-                 {"terms": {
-                    "course_visible_to": ["mssaregistered","Empty"]
-                 }}
+                 {
+                    "terms": { "course_visible_to": ["mssaregistered", "open"] }
+                 }
             )
-        if role=="Empty":
             elastic_filters.append(
-                 {"terms": {
-                    "course_visible_to": ["Empty"]
-                 }}
+                 {  
+                    "terms": { "learning_path_short_code": [learning_path_short_code]  } 
+                 }
             )
+            
+        if role=="mssaenrolled":
+            elastic_filters.append(
+                 {
+                   "terms": {"course_visible_to": ["mssaenrolled", "mssaregistered", "open"] }
+                 }
+            )
+            elastic_filters.append(
+                 {  
+                   "terms": { "learning_path_short_code": [learning_path_short_code]  }
+                 }
+            )
+        if role=="open":
+            elastic_filters.append(
+                 {
+                   "terms": { "course_visible_to": ["open"] }
+                 }
+            )
+            elastic_filters.append(
+                 {  
+                   "terms": { "learning_path_short_code": [learning_path_short_code]  }
+                 }
+            )
+
         if elastic_filters:
             filter_segment = {
                 "bool": {

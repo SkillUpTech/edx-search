@@ -65,7 +65,7 @@ def perform_search(
     return results
 
 
-def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary=None, role=None):
+def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary=None, role=None, learning_path_short_code=None):
     """
     Course Discovery activities against the search engine index of course details
     """
@@ -96,6 +96,7 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         exclude_dictionary=exclude_dictionary,
         facet_terms=course_discovery_facets(),
         role=role,
+        learning_path_short_code=learning_path_short_code,
     )
 
     return results
