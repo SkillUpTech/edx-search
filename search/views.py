@@ -201,7 +201,7 @@ def course_discovery(request):
 
         learning_path_short_code="ALL"
         try:
-            user_info_obj = UserInformation.objects.get(email=user.email)
+            user_info_obj = UserInformation.objects.get(email=request.user.email)
             learningpath = user_info_obj.learning_path_short_code
             learning_path_short_code=learningpath.learning_path_short_code
         except:

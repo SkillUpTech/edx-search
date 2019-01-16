@@ -582,11 +582,6 @@ class ElasticSearchEngine(SearchEngine):
                     "terms": { "course_visible_to": ["mssaregistered", "open"] }
                  }
             )
-            #elastic_filters.append(
-            #     {  
-            #        "terms": { "learning_path_short_code": [learning_path_short_code]  } 
-            #     }
-            #)
             
         if role=="mssaenrolled":
             elastic_filters.append(
@@ -594,23 +589,18 @@ class ElasticSearchEngine(SearchEngine):
                    "terms": {"course_visible_to": ["mssaenrolled", "mssaregistered", "open"] }
                  }
             )
-            #elastic_filters.append(
-            #     {  
-            #       "terms": { "learning_path_short_code": [learning_path_short_code]  }
-            #     }
-            #)
         if role=="open":
             elastic_filters.append(
                  {
                    "terms": { "course_visible_to": ["open"] }
                  }
             )
-            #elastic_filters.append(
-            #     {  
-            #       "terms": { "learning_path_short_code": [learning_path_short_code]  }
-            #     }
-            #)
 
+        elastic_filters.append(
+                {
+                   "terms": { "learning_path_short_code": [ learning_path_short_code, "ALL" ]  }
+                 }
+        )
         if elastic_filters:
             filter_segment = {
                 "bool": {
