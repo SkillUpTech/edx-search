@@ -576,31 +576,41 @@ class ElasticSearchEngine(SearchEngine):
 
         query = query_segment
 
-        if role=="mssaregistered":
-            elastic_filters.append(
-                 {
-                    "terms": { "course_visible_to": ["mssaregistered", "open"] }
-                 }
-            )
-            
-        if role=="mssaenrolled":
-            elastic_filters.append(
-                 {
-                   "terms": {"course_visible_to": ["mssaenrolled", "mssaregistered", "open"] }
-                 }
-            )
-        if role=="open":
-            elastic_filters.append(
-                 {
-                   "terms": { "course_visible_to": ["open"] }
-                 }
-            )
 
-        elastic_filters.append(
+        if role=="open" and learning_path_short_code:
+            elastic_filters.append(
                 {
-                   "terms": { "learning_path_short_code": [ learning_path_short_code, "ALL" ]  }
-                 }
-        )
+                    "terms": { "course_visible_to": ["open"] }
+                }
+            )
+            elastic_filters.append(
+                {
+                    "terms": { "learning_path_short_code": ["ALL"]  }
+                }
+            )
+        if role=="mssaregistered" and learning_path_short_code:
+            elastic_filters.append(
+                {
+                    "terms": { "course_visible_to": ["mssaregistered", "open"] }
+                }
+            )
+            elastic_filters.append(
+                {
+                    "terms": { "learning_path_short_code": [ learning_path_short_code, "ALL"]  }
+                }
+            )
+        if role=="mssaenrolled" and learning_path_short_code:
+            elastic_filters.append(
+                {
+                    "terms": { "course_visible_to": ["mssaenrolled", "mssaregistered", "open"] }
+                }
+            )
+            elastic_filters.append(
+                {
+                    "terms": { "learning_path_short_code": [ learning_path_short_code, "ALL"]  }
+                }
+            )
+       
         if elastic_filters:
             filter_segment = {
                 "bool": {
@@ -613,6 +623,7 @@ class ElasticSearchEngine(SearchEngine):
                     "filter": filter_segment,
                 }
             }
+        log.info(filter_segment)
 
         body = {"query": query}
         if facet_terms:
