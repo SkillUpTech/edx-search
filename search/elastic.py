@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # We _may_ want to use these for their special uses for certain queries,
 # but for analysed fields these kinds of characters are removed anyway, so
 # we can safely remove them from analysed matches
+#RESERVED_CHARACTERS = "+-=><!(){}[]^\"~*:\\/&|?"
 RESERVED_CHARACTERS = "+=><!(){}[]^~*:\\/&|?"
 
 
@@ -138,7 +139,6 @@ def _process_filters(filter_dictionary):
         }
 
     return [filter_item(field) for field in filter_dictionary]
-
 
 def _process_exclude_dictionary(exclude_dictionary):
     """
@@ -434,7 +434,7 @@ class ElasticSearchEngine(SearchEngine):
                facet_terms=None,
                exclude_ids=None,
                use_field_match=False,
-               **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, arguments-differ
+               **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
         """
         Implements call to search the index for the desired content.
 
