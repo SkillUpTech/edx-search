@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # but for analysed fields these kinds of characters are removed anyway, so
 # we can safely remove them from analysed matches
 #RESERVED_CHARACTERS = "+-=><!(){}[]^\"~*:\\/&|?"
-RESERVED_CHARACTERS = "+=><!(){}[]^~*:\\/&|?"
+RESERVED_CHARACTERS = "=><!(){}[]^~*:\\/&|?"
 
 
 def _translate_hits(es_response):
@@ -537,9 +537,11 @@ class ElasticSearchEngine(SearchEngine):
         # We have a query string, search all fields for matching text within the "content" node
         if query_string:
             elastic_queries.append({
-                "query_string": {
+                "simple_query_string": {
                     "fields": ["content.*"],
-                    "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
+                    "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)+"*",
+                    "analyze_wildcard": "true",
+                    "default_operator": "AND"
                 }
             })
 
