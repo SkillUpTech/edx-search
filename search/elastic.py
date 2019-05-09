@@ -577,37 +577,193 @@ class ElasticSearchEngine(SearchEngine):
         query = query_segment
 
 
-        if role=="open" and learning_path_short_code:
+        if role=="open":
             elastic_filters.append(
                 {
-                    "terms": { "course_visible_to": ["open"] }
+                    "term": { "course_visible_to": "open" }
                 }
             )
             elastic_filters.append(
                 {
-                    "terms": { "learning_path_short_code": ["ALL"]  }
+                    "terms": { "learning_path_short_code": [ "ALL", "CYBR", "CAD", "SCA", "DS"]  }
                 }
             )
         if role=="mssaregistered" and learning_path_short_code:
             elastic_filters.append(
-                {
-                    "terms": { "course_visible_to": ["mssaregistered", "open"] }
-                }
-            )
-            elastic_filters.append(
-                {
-                    "terms": { "learning_path_short_code": [ learning_path_short_code, "ALL"]  }
+               {
+                    "bool": {
+                        "should": [
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "open"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": "ALL"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "open"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": learning_path_short_code
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "mssaregistered"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": "ALL"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+							{
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "mssaregistered"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": learning_path_short_code
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
             )
         if role=="mssaenrolled" and learning_path_short_code:
             elastic_filters.append(
                 {
-                    "terms": { "course_visible_to": ["mssaenrolled", "mssaregistered", "open"] }
-                }
-            )
-            elastic_filters.append(
-                {
-                    "terms": { "learning_path_short_code": [ learning_path_short_code, "ALL"]  }
+                    "bool": {
+                        "should": [
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "open"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": "ALL"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "open"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": learning_path_short_code
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "mssaregistered"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": "ALL"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "mssaregistered"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": learning_path_short_code
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+			    {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "mssaenrolled"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": "ALL"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+							{
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "course_visible_to": "mssaenrolled"
+                                            }
+                                        },
+                                        {
+                                            "term": {
+                                                "learning_path_short_code": learning_path_short_code
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
             )
        

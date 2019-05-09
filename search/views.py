@@ -199,13 +199,13 @@ def course_discovery(request):
         if request.user.is_staff:
             role = "staff"
 
-        learning_path_short_code="ALL"
+        learning_path_short_code = None
         try:
             user_info_obj = UserInformation.objects.get(email=request.user.email)
             learningpath = user_info_obj.learning_path_short_code
-            learning_path_short_code=learningpath.learning_path_short_code
+            learning_path_short_code = learningpath.learning_path_short_code
         except:
-            learning_path_short_code="ALL"
+            learning_path_short_code = None
 
         results = course_discovery_search(
             search_term=search_term,
